@@ -1,16 +1,6 @@
+import { isSameCell, pickRandomCell, type Cell } from './grid';
 import { createSeededRandom, type Random } from '../../lib/seeded-random';
-
-// Square on the grid, x -> right, y -> down
-export interface Cell {
-    x: number;
-    y: number;
-}
-
-// The way the snake is facing
-export type Direction = 'up' | 'down' | 'left' | 'right';
-
-// Move picked by the model
-export type SnakeAction = 'straight' | 'left' | 'right';
+import type { Direction } from './direction';
 
 // How a game ended
 export type DeathCause = 'wall' | 'self' | 'time';
@@ -27,43 +17,11 @@ export interface SnakeState {
     movesSinceApple: number;
 }
 
-// New direction for each current direction and action
-const TURN_MAP: Record<Direction, Record<SnakeAction, Direction>> = {
-    up: { left: 'left', right: 'right', straight: 'up' },
-    down: { left: 'right', right: 'left', straight: 'down' },
-    left: { left: 'down', right: 'up', straight: 'left' },
-    right: { left: 'up', right: 'down', straight: 'right' },
-};
-
 // Default grid width and height
 export const DEFAULT_GRID_SIZE = 20;
 
 // Number of cells the snake starts with
 const START_LENGTH = 3;
-
-/**
- * Returns the direction the snake faces after an action.
- *
- * @param direction - Way the snake is facing now.
- * @param action - Move picked by the model.
- * @returns New direction.
- */
-export function turn(direction: Direction, action: SnakeAction): Direction {
-    return TURN_MAP[direction][action];
-}
-
-// Check whether two cells are the same square
-function isSameCell(first: Cell, second: Cell) {
-    return first.x === second.x && first.y === second.y;
-}
-
-// Pick a random cell anywhere on the grid
-function pickRandomCell(gridSize: number, random: Random): Cell {
-    return {
-        x: Math.floor(random() * gridSize),
-        y: Math.floor(random() * gridSize),
-    };
-}
 
 // Pick cells until one is off the snake
 function placeApple(body: Cell[], gridSize: number, random: Random): Cell {

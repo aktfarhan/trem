@@ -1,29 +1,6 @@
+import { createSnakeGame } from '../game';
 import { describe, expect, test } from 'vitest';
-import { turn, createSnakeGame } from '../game';
-import type { Cell, Direction, SnakeAction } from '../game';
-
-// One turn to check, with the direction it should end up facing
-interface TurnCase {
-    from: Direction;
-    action: SnakeAction;
-    expected: Direction;
-}
-
-// Every direction and action with the direction it should end up facing
-const TURN_CASES: TurnCase[] = [
-    { from: 'up', action: 'left', expected: 'left' },
-    { from: 'up', action: 'right', expected: 'right' },
-    { from: 'up', action: 'straight', expected: 'up' },
-    { from: 'down', action: 'left', expected: 'right' },
-    { from: 'down', action: 'right', expected: 'left' },
-    { from: 'down', action: 'straight', expected: 'down' },
-    { from: 'left', action: 'left', expected: 'down' },
-    { from: 'left', action: 'right', expected: 'up' },
-    { from: 'left', action: 'straight', expected: 'left' },
-    { from: 'right', action: 'left', expected: 'up' },
-    { from: 'right', action: 'right', expected: 'down' },
-    { from: 'right', action: 'straight', expected: 'right' },
-];
+import type { Cell } from '../grid';
 
 // Seed shared by every game test
 const SEED = 42;
@@ -40,16 +17,6 @@ const START_BODY: Cell[] = [
     { x: 9, y: 10 },
     { x: 8, y: 10 },
 ];
-
-describe('turn', () => {
-    test.each(TURN_CASES)(
-        'facing $from then $action faces $expected',
-        ({ from, action, expected }) => {
-            // Check the new direction
-            expect(turn(from, action)).toBe(expected);
-        },
-    );
-});
 
 describe('createSnakeGame', () => {
     test('starts in the middle facing right', () => {
