@@ -3,7 +3,7 @@ import { createSeededRandom, type Random } from '../../lib/seeded-random';
 import type { Direction } from './direction';
 
 // How a game ended
-export type DeathCause = 'wall' | 'self' | 'time';
+export type EndReason = 'wall' | 'self' | 'time' | 'win';
 
 // Everything about one game
 export interface SnakeState {
@@ -13,7 +13,7 @@ export interface SnakeState {
     random: Random;
     gridSize: number;
     direction: Direction;
-    deathCause: DeathCause | null;
+    endReason: EndReason | null;
     movesSinceApple: number;
 }
 
@@ -23,8 +23,15 @@ export const DEFAULT_GRID_SIZE = 20;
 // Number of cells the snake starts with
 const START_LENGTH = 3;
 
-// Pick cells until one is off the snake
-function placeApple(body: Cell[], gridSize: number, random: Random): Cell {
+/**
+ * Picks a random free cell for the apple.
+ *
+ * @param body - Cells the snake is on.
+ * @param gridSize - Width and height of the grid.
+ * @param random - Generator that picks the cell.
+ * @returns Cell that is not under the snake.
+ */
+export function placeApple(body: Cell[], gridSize: number, random: Random): Cell {
     // Start with any cell
     let apple = pickRandomCell(gridSize, random);
 
@@ -64,7 +71,7 @@ export function createSnakeGame(seed: number, gridSize = DEFAULT_GRID_SIZE): Sna
         random,
         gridSize,
         direction: 'right',
-        deathCause: null,
+        endReason: null,
         movesSinceApple: 0,
     };
 }

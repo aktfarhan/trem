@@ -33,7 +33,7 @@ describe('createSnakeGame', () => {
         const game = createSnakeGame(SEED);
 
         // Check it has not died, scored or moved yet
-        expect(game.deathCause).toBeNull();
+        expect(game.endReason).toBeNull();
         expect(game.score).toBe(0);
         expect(game.movesSinceApple).toBe(0);
     });
