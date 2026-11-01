@@ -1,1 +1,19 @@
 @import 'tailwindcss';
+
+@theme static {
+    --color-page: #141413;
+    --color-ink: #f1efe8;
+    --color-ink-muted: #b4b2a9;
+    --color-board: #181816;
+    --color-grid: rgb(255 255 255 / 0.05);
+    --color-snake: #1d9e75;
+    --color-snake-head: #5dcaa5;
+    --color-eye: #ffffff;
+    --color-pupil: #1a1a19;
+    --color-apple: #e24b4a;
+    --color-leaf: #639922;
+}
+
+:root {
+    color-scheme: dark;
+}

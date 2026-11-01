@@ -8,7 +8,7 @@ export interface Cell {
 }
 
 // Change in x and y for one move in each direction
-const OFFSET_BY_DIRECTION: Record<Direction, Cell> = {
+export const OFFSET_BY_DIRECTION: Record<Direction, Cell> = {
     up: { x: 0, y: -1 },
     down: { x: 0, y: 1 },
     left: { x: -1, y: 0 },
