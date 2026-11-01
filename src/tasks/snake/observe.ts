@@ -50,21 +50,29 @@ function toSignal(isOn: boolean): number {
     return isOn ? SIGNAL_ON : SIGNAL_OFF;
 }
 
-// Read whether each move would end the game
-function readDanger(state: SnakeState): number[] {
+/**
+ * Checks whether a move would end the game.
+ *
+ * @param state - Game before the move.
+ * @param move - Move to check.
+ * @returns True when the head would leave the grid or hit the body.
+ */
+export function isMoveDangerous(state: SnakeState, move: SnakeAction): boolean {
+    // Find the cell the head would move into
+    const cell = moveCell(state.body[0], turn(state.direction, move));
+
     // Body without the tail
     const blockingBody = state.body.slice(0, -1);
 
-    // Check each move in order
-    return MOVES.map((move) => {
-        // Find the cell the head would move into
-        const cell = moveCell(state.body[0], turn(state.direction, move));
+    // Danger when that cell is off the grid or on the body
+    const isOffGrid = !isInsideGrid(cell, state.gridSize);
+    const isOnBody = blockingBody.some((segment) => isSameCell(segment, cell));
+    return isOffGrid || isOnBody;
+}
 
-        // Danger when that cell is off the grid or on the body
-        const isOffGrid = !isInsideGrid(cell, state.gridSize);
-        const isOnBody = blockingBody.some((segment) => isSameCell(segment, cell));
-        return toSignal(isOffGrid || isOnBody);
-    });
+// Read whether each move would end the game
+function readDanger(state: SnakeState): number[] {
+    return MOVES.map((move) => toSignal(isMoveDangerous(state, move)));
 }
 
 // Read which way the snake is moving
