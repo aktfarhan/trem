@@ -118,6 +118,16 @@ describe('stepSnakeGame', () => {
         expect(next.body).not.toContainEqual(next.apple);
     });
 
+    test('stepping the same state twice gives the same result', () => {
+        // Step onto the apple twice from one state
+        const state = makeState({ apple: AHEAD_APPLE });
+        const first = stepSnakeGame(state, 'straight');
+        const second = stepSnakeGame(state, 'straight');
+
+        // Check both steps placed the same next apple
+        expect(second).toEqual(first);
+    });
+
     test('too many moves without an apple ends the game', () => {
         // Start one move away from the move limit
         const moveLimit = DEFAULT_GRID_SIZE * DEFAULT_GRID_SIZE;

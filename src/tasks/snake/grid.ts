@@ -1,5 +1,4 @@
 import type { Direction } from './direction';
-import type { Random } from '../../lib/seeded-random';
 
 // Square on the grid, x -> right, y -> down
 export interface Cell {
@@ -24,20 +23,6 @@ export const OFFSET_BY_DIRECTION: Record<Direction, Cell> = {
  */
 export function isSameCell(first: Cell, second: Cell): boolean {
     return first.x === second.x && first.y === second.y;
-}
-
-/**
- * Picks a random cell anywhere on the grid.
- *
- * @param gridSize - Width and height of the grid.
- * @param random - Generator that picks the cell.
- * @returns Random cell inside the grid.
- */
-export function pickRandomCell(gridSize: number, random: Random): Cell {
-    return {
-        x: Math.floor(random() * gridSize),
-        y: Math.floor(random() * gridSize),
-    };
 }
 
 /**

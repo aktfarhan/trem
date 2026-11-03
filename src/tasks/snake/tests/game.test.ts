@@ -1,5 +1,6 @@
-import { createSnakeGame } from '../game';
 import { describe, expect, test } from 'vitest';
+import { drawRandom } from '../../../lib/seeded-random';
+import { createSnakeGame, DEFAULT_GRID_SIZE, placeApple } from '../game';
 import type { Cell } from '../grid';
 
 // Seed shared by every game test
@@ -17,6 +18,19 @@ const START_BODY: Cell[] = [
     { x: 9, y: 10 },
     { x: 8, y: 10 },
 ];
+
+// Grid size for the nearly full board test
+const TINY_GRID_SIZE = 2;
+
+// Snake on every cell of the tiny grid but one
+const NEAR_FULL_BODY: Cell[] = [
+    { x: 1, y: 0 },
+    { x: 0, y: 0 },
+    { x: 0, y: 1 },
+];
+
+// The one cell the nearly full snake leaves free
+const LAST_FREE_CELL: Cell = { x: 1, y: 1 };
 
 describe('createSnakeGame', () => {
     test('starts in the middle facing right', () => {
@@ -73,5 +87,23 @@ describe('createSnakeGame', () => {
         // Check the size and that it starts in the middle
         expect(game.gridSize).toBe(SMALL_GRID_SIZE);
         expect(game.body[0]).toEqual({ x: 5, y: 5 });
+    });
+});
+
+describe('placeApple', () => {
+    test('puts the apple on the only free cell', () => {
+        // Place an apple with one cell left
+        const placement = placeApple(NEAR_FULL_BODY, TINY_GRID_SIZE, SEED);
+
+        // Check it took that cell
+        expect(placement.apple).toEqual(LAST_FREE_CELL);
+    });
+
+    test('moves the random position one draw forward', () => {
+        // Place an apple from the shared seed
+        const placement = placeApple(START_BODY, DEFAULT_GRID_SIZE, SEED);
+
+        // Check the next apple will draw from a new position
+        expect(placement.randomPosition).toBe(drawRandom(SEED).position);
     });
 });

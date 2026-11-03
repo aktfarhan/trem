@@ -47,6 +47,6 @@ export function stepSnakeGame(state: SnakeState, action: SnakeAction): SnakeStat
     if (body.length === cellCount) {
         return { ...state, body, score, direction, endReason: 'win' };
     }
-    const apple = placeApple(body, state.gridSize, state.random);
-    return { ...state, body, apple, score, direction, movesSinceApple: 0 };
+    const { apple, randomPosition } = placeApple(body, state.gridSize, state.randomPosition);
+    return { ...state, body, apple, score, direction, randomPosition, movesSinceApple: 0 };
 }
