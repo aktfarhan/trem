@@ -1,5 +1,5 @@
 import { isInsideGrid, isSameCell, moveCell } from './grid';
-import { turn, type Direction, type SnakeAction } from './direction';
+import { turn, SNAKE_ACTIONS, type Direction, type SnakeAction } from './direction';
 import type { SnakeState } from './game';
 
 // Name of a group of signals
@@ -17,9 +17,6 @@ const SIGNAL_ON = 1;
 // Value of a signal that is off
 const SIGNAL_OFF = 0;
 
-// Moves in the order the danger signals use
-const MOVES: SnakeAction[] = ['straight', 'left', 'right'];
-
 // Directions in the order the facing and apple signals use
 const DIRECTIONS: Direction[] = ['up', 'down', 'left', 'right'];
 
@@ -36,7 +33,7 @@ const SIGNAL_GROUPS: Record<SignalGroupId, SignalGroup> = {
         read: readApple,
     },
     danger: {
-        names: MOVES.map((move) => `Danger ${move}`),
+        names: SNAKE_ACTIONS.map((move) => `Danger ${move}`),
         read: readDanger,
     },
     facing: {
@@ -72,7 +69,7 @@ export function isMoveDangerous(state: SnakeState, move: SnakeAction): boolean {
 
 // Read whether each move would end the game
 function readDanger(state: SnakeState): number[] {
-    return MOVES.map((move) => toSignal(isMoveDangerous(state, move)));
+    return SNAKE_ACTIONS.map((move) => toSignal(isMoveDangerous(state, move)));
 }
 
 // Read which way the snake is moving

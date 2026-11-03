@@ -1,10 +1,7 @@
 import { isMoveDangerous } from './observe';
 import { moveCell, type Cell } from './grid';
-import { turn, type SnakeAction } from './direction';
+import { turn, SNAKE_ACTIONS, type SnakeAction } from './direction';
 import type { SnakeState } from './game';
-
-// Moves to try, in the order that wins a tie
-const MOVE_ORDER: SnakeAction[] = ['straight', 'left', 'right'];
 
 // L1 norm: steps across + steps down between two cells
 function measureDistance(from: Cell, to: Cell): number {
@@ -19,7 +16,7 @@ function measureDistance(from: Cell, to: Cell): number {
  */
 export function chooseBotAction(state: SnakeState): SnakeAction {
     // Keep only the moves that do not end the game
-    const safeMoves = MOVE_ORDER.filter((move) => !isMoveDangerous(state, move));
+    const safeMoves = SNAKE_ACTIONS.filter((move) => !isMoveDangerous(state, move));
 
     // Go straight when every move ends the game
     if (safeMoves.length === 0) return 'straight';

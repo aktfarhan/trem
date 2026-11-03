@@ -4,6 +4,9 @@ export type Direction = 'up' | 'down' | 'left' | 'right';
 // Move picked by the model
 export type SnakeAction = 'straight' | 'left' | 'right';
 
+// Every move, in the order signals, scores and ties use
+export const SNAKE_ACTIONS: SnakeAction[] = ['straight', 'left', 'right'];
+
 // New direction for each current direction and action
 const TURN_MAP: Record<Direction, Record<SnakeAction, Direction>> = {
     up: { left: 'left', right: 'right', straight: 'up' },
