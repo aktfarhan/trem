@@ -38,10 +38,10 @@ const TWO_GENERATIONS_OF_GAMES = 4;
 // Past record of a snake that averaged 10 apples over 100 games
 const STRONG_PAST_RECORD = { games: 100, total: 1000 };
 
-// Score on the picked games that no snake can beat
+// Validation score that no snake can beat
 const UNBEATABLE_SCORE = Number.POSITIVE_INFINITY;
 
-// Score on the picked games that every snake beats
+// Validation score that every snake beats
 const BEATEN_SCORE = -1;
 
 // Start the small training from the shared seeds
@@ -56,9 +56,9 @@ function trainTwoGenerations(): TrainedGeneration {
 }
 
 // Make a kept snake
-function makeKeptSnake(pickScore: number): KeptSnake {
+function makeKeptSnake(validationScore: number): KeptSnake {
     const { model } = createSnakeModel(BASIC_GROUPS, SMALL_SETTINGS.hiddenSize, OTHER_SEED);
-    return { model, pickScore, generation: 0 };
+    return { model, generation: 0, validationScore };
 }
 
 // Make a training one generation before a check
@@ -120,22 +120,22 @@ describe('createTraining', () => {
         expect(second.networks).toEqual(first.networks);
     });
 
-    test('the world seed decides the picked games', () => {
+    test('the world seed decides the validation set', () => {
         // Start trainings with another training seed
         const first = startSmallTraining();
         const otherSnakes = createTraining(SMALL_SETTINGS, { ...SEEDS, trainingSeed: OTHER_SEED });
         const otherWorld = createTraining(SMALL_SETTINGS, { ...SEEDS, worldSeed: OTHER_SEED });
 
-        // Check only the other world has other picked games
-        expect(otherSnakes.pickSeeds).toEqual(first.pickSeeds);
-        expect(otherWorld.pickSeeds).not.toEqual(first.pickSeeds);
+        // Check only the other world has another validation set
+        expect(otherSnakes.validationSeeds).toEqual(first.validationSeeds);
+        expect(otherWorld.validationSeeds).not.toEqual(first.validationSeeds);
     });
 
-    test('draws the training games after the picked games', () => {
+    test('draws the training games after the validation set', () => {
         // Start a training
         const training = startSmallTraining();
 
-        // Check the world moved on past its picked games
+        // Check the world moved on past its validation set
         expect(training.worldPosition).not.toBe(SEEDS.worldSeed);
     });
 });
@@ -194,12 +194,12 @@ describe('trainGeneration', () => {
         expect(second.training.worldPosition).toBe(first.training.worldPosition);
     });
 
-    test('keeps the same picked games for the whole training', () => {
+    test('keeps the same validation set for the whole training', () => {
         // Train two generations
         const { training } = trainTwoGenerations();
 
-        // Check the picked games are still the ones the training started with
-        expect(training.pickSeeds).toEqual(startSmallTraining().pickSeeds);
+        // Check the validation set is still the one the training started with
+        expect(training.validationSeeds).toEqual(startSmallTraining().validationSeeds);
     });
 
     test('judges a kept snake on every game it has played', () => {
@@ -257,16 +257,20 @@ describe('trainGeneration', () => {
         expect(training.kept?.generation).toBe(KEEP_CHECK_GAP);
     });
 
-    test("judges the best snake on the world's picked games", () => {
+    test("judges the best snake on the world's validation set", () => {
         // Train the generation that ends with a check
         const { training } = trainGeneration(makeTrainingBeforeCheck(null));
 
-        // Score the best snake on the training's picked games
+        // Score the best snake on the training's validation set
         const model = { groups: SMALL_SETTINGS.groups, network: findBestNetwork(training) };
-        const pickScore = scoreSnakeModel(model, training.pickSeeds, SMALL_SETTINGS.gridSize);
+        const validationScore = scoreSnakeModel(
+            model,
+            training.validationSeeds,
+            SMALL_SETTINGS.gridSize,
+        );
 
         // Check the kept snake got that score
-        expect(training.kept?.pickScore).toBe(pickScore);
+        expect(training.kept?.validationScore).toBe(validationScore);
     });
 
     test('keeps the old snake when the best does no better', () => {
@@ -285,6 +289,6 @@ describe('trainGeneration', () => {
 
         // Check the generation's best snake took its place
         expect(training.kept?.model.network).toBe(findBestNetwork(training));
-        expect(training.kept?.pickScore).toBeGreaterThan(BEATEN_SCORE);
+        expect(training.kept?.validationScore).toBeGreaterThan(BEATEN_SCORE);
     });
 });

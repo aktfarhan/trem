@@ -28,8 +28,8 @@ export interface RunSeeds {
 // Best snake seen so far
 export interface KeptSnake {
     model: SnakeModel;
-    pickScore: number;
     generation: number;
+    validationScore: number;
 }
 
 // Training between generations
@@ -37,10 +37,10 @@ export interface SnakeTraining {
     kept: KeptSnake | null;
     networks: Network[];
     settings: TrainingSettings;
-    pickSeeds: number[];
     generation: number;
     worldPosition: number;
     randomPosition: number;
+    validationSeeds: number[];
     recordByNetwork: Map<Network, ScoreRecord>;
 }
 
@@ -61,7 +61,7 @@ interface DrawnGames {
 export const KEEP_CHECK_GAP = 50;
 
 // Games each world draws to pick which snake to keep
-const PICK_GAME_COUNT = 200;
+const VALIDATION_SET_SIZE = 200;
 
 // Number of different game seeds
 const GAME_SEED_RANGE = 2 ** 32;
@@ -82,16 +82,16 @@ function drawGames(count: number, worldPosition: number): DrawnGames {
 function keepBetterSnake(
     kept: KeptSnake | null,
     challenger: SnakeModel,
-    pickSeeds: number[],
+    validationSeeds: number[],
     generation: number,
     gridSize: number,
 ): KeptSnake | null {
-    // Score the challenger on the picked games
-    const pickScore = scoreSnakeModel(challenger, pickSeeds, gridSize);
+    // Score the challenger on the validation set
+    const validationScore = scoreSnakeModel(challenger, validationSeeds, gridSize);
 
     // Stay with the kept snake unless the challenger does better
-    if (kept && pickScore <= kept.pickScore) return kept;
-    return { model: challenger, pickScore, generation };
+    if (kept && validationScore <= kept.validationScore) return kept;
+    return { model: challenger, generation, validationScore };
 }
 
 /**
@@ -111,17 +111,17 @@ export function createTraining(settings: TrainingSettings, seeds: RunSeeds): Sna
         position = created.randomPosition;
     }
 
-    // Draw the picked games first
-    const picked = drawGames(PICK_GAME_COUNT, seeds.worldSeed);
+    // Draw the validation set first
+    const validationSet = drawGames(VALIDATION_SET_SIZE, seeds.worldSeed);
 
     return {
         kept: null,
         networks,
         settings,
-        pickSeeds: picked.seeds,
         generation: 0,
-        worldPosition: picked.worldPosition,
+        worldPosition: validationSet.worldPosition,
         randomPosition: position,
+        validationSeeds: validationSet.seeds,
         recordByNetwork: new Map(),
     };
 }
@@ -133,8 +133,8 @@ export function createTraining(settings: TrainingSettings, seeds: RunSeeds): Sna
  * @returns Training one generation on, and how the generation scored.
  */
 export function trainGeneration(training: SnakeTraining): TrainedGeneration {
-    // Snakes, settings, picked games and records this generation starts from
-    const { networks, settings, pickSeeds, recordByNetwork } = training;
+    // Snakes, settings, records and validation set this generation starts from
+    const { networks, settings, validationSeeds, recordByNetwork } = training;
     const { groups, gridSize, gamesPerSnake } = settings;
 
     // 1. Draw this generation's games from the world, and play them
@@ -160,7 +160,7 @@ export function trainGeneration(training: SnakeTraining): TrainedGeneration {
     const isCheckGeneration = generation % KEEP_CHECK_GAP === 0;
     const challenger = { groups, network: bestNetwork };
     const kept = isCheckGeneration
-        ? keepBetterSnake(training.kept, challenger, pickSeeds, generation, gridSize)
+        ? keepBetterSnake(training.kept, challenger, validationSeeds, generation, gridSize)
         : training.kept;
 
     // 5. Make the next generation
@@ -171,10 +171,10 @@ export function trainGeneration(training: SnakeTraining): TrainedGeneration {
             kept,
             networks: evolved.networks,
             settings,
-            pickSeeds,
             generation,
             worldPosition: games.worldPosition,
             randomPosition: evolved.randomPosition,
+            validationSeeds,
             recordByNetwork: averaged.recordByNetwork,
         },
         bestScore,
