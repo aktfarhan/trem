@@ -4,6 +4,7 @@
     --color-page: #141413;
     --color-ink: #f1efe8;
     --color-ink-muted: #b4b2a9;
+    --color-line: rgb(255 255 255 / 0.1);
     --color-board: #181816;
     --color-grid: rgb(255 255 255 / 0.05);
     --color-snake: #1d9e75;
@@ -16,4 +17,20 @@
 
 :root {
     color-scheme: dark;
+}
+
+@utility hairline-r {
+    border-right: 0.5px solid var(--color-line);
+}
+
+@utility hairline-b {
+    border-bottom: 0.5px solid var(--color-line);
+}
+
+@utility hairline-l {
+    border-left: 0.5px solid var(--color-line);
+}
+
+@utility hairline-ring {
+    box-shadow: 0 0 0 0.5px var(--color-line);
 }

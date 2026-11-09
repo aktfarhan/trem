@@ -1,10 +1,12 @@
-import SnakeBoard from './tasks/snake/board/SnakeBoard';
+import TopBar from './components/TopBar';
+import SnakePlayground from './tasks/snake/SnakePlayground';
 
 function App() {
     return (
-        <main className="flex min-h-screen items-center justify-center bg-page text-ink">
-            <SnakeBoard />
-        </main>
+        <div className="flex h-dvh flex-col overflow-hidden bg-page text-ink antialiased">
+            <TopBar />
+            <SnakePlayground />
+        </div>
     );
 }
 

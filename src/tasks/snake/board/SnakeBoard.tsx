@@ -4,9 +4,11 @@ import { useSnakeLoop } from './useSnakeLoop';
 import { useEffect, useMemo, useRef } from 'react';
 
 // Width and height of the board
-const BOARD_SIZE = 480;
+interface SnakeBoardProps {
+    size: number;
+}
 
-function SnakeBoard() {
+function SnakeBoard({ size }: SnakeBoardProps) {
     // Canvas the game is drawn on
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -20,15 +22,15 @@ function SnakeBoard() {
     const pixelRatio = window.devicePixelRatio;
 
     // Width and height of the canvas
-    const canvasSize = BOARD_SIZE * pixelRatio;
+    const canvasSize = size * pixelRatio;
 
     // Redraw the board whenever the game changes
     useEffect(() => {
         const context = canvasRef.current?.getContext('2d');
         if (!context) return;
         context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-        drawSnakeGame(context, state, colors, BOARD_SIZE);
-    }, [state, colors, pixelRatio]);
+        drawSnakeGame(context, state, colors, size);
+    }, [state, colors, size, pixelRatio]);
 
     return (
         <div className="flex flex-col gap-3">
@@ -38,7 +40,8 @@ function SnakeBoard() {
                 height={canvasSize}
                 role="img"
                 aria-label="Snake played by the scripted bot"
-                className="size-120 rounded-lg ring ring-white/10"
+                style={{ width: size, height: size }}
+                className="self-center rounded-lg hairline-ring"
             />
             <p className="text-right text-sm text-ink-muted">
                 Score <span className="font-semibold text-ink">{state.score}</span>
