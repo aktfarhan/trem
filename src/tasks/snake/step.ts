@@ -19,7 +19,7 @@ export function stepSnakeGame(state: SnakeState, action: SnakeAction): SnakeStat
 
     // 2. End the game if the head leaves the grid
     const isOffGrid = !isInsideGrid(head, state.gridSize);
-    if (isOffGrid) return { ...state, direction, endReason: 'wall' };
+    if (isOffGrid) return { ...state, endReason: 'wall' };
 
     // 3. Keep the tail when eating
     const isEating = isSameCell(head, state.apple);
@@ -27,7 +27,7 @@ export function stepSnakeGame(state: SnakeState, action: SnakeAction): SnakeStat
 
     // 4. End the game if the head runs into the body
     const isHittingBody = keptBody.some((segment) => isSameCell(segment, head));
-    if (isHittingBody) return { ...state, direction, endReason: 'self' };
+    if (isHittingBody) return { ...state, endReason: 'self' };
 
     // 5. Add the new head
     const body = [head, ...keptBody];

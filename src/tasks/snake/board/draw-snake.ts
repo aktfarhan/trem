@@ -1,5 +1,6 @@
 import { fillCircle, findCenter } from './canvas';
 import { OFFSET_BY_DIRECTION, type Cell } from '../grid';
+import { mixColors, parseHexColor, type RgbColor } from '../../../lib/color';
 import type { SnakeState } from '../game';
 import type { BoardColors } from './colors';
 import type { Direction } from '../direction';
@@ -24,18 +25,15 @@ const TAIL_FADE = 0.45;
 // Which side of the head each eye is on
 const EYE_SIDES = [-1, 1];
 
-// Fill the traced shape with the snake color
-function fillFaded(context: CanvasRenderingContext2D, colors: BoardColors, amount: number): void {
-    // Lay the board color first
-    context.fillStyle = colors.board;
+// Fill the traced shape in one color
+function fillFaded(
+    context: CanvasRenderingContext2D,
+    snakeColor: RgbColor,
+    boardColor: RgbColor,
+    amount: number,
+): void {
+    context.fillStyle = mixColors(snakeColor, boardColor, amount);
     context.fill();
-
-    // Fill the snake color on top
-    context.save();
-    context.globalAlpha = 1 - amount;
-    context.fillStyle = colors.snake;
-    context.fill();
-    context.restore();
 }
 
 // Trace the rounded square a snake piece fills
@@ -82,15 +80,19 @@ function drawBody(
     cellSize: number,
     colors: BoardColors,
 ): void {
+    // Snake and board colors as numbers
+    const snakeColor = parseHexColor(colors.snake);
+    const boardColor = parseHexColor(colors.board);
+
     // Walk from the tail toward the head
     for (let i = body.length - 1; i > 0; i--) {
         // Fill the segment's square
         traceSquare(context, body[i], cellSize);
-        fillFaded(context, colors, (i / body.length) * TAIL_FADE);
+        fillFaded(context, snakeColor, boardColor, (i / body.length) * TAIL_FADE);
 
         // Fill the bridge to the next segment
         traceBridge(context, body[i], body[i - 1], cellSize);
-        fillFaded(context, colors, ((i - 0.5) / body.length) * TAIL_FADE);
+        fillFaded(context, snakeColor, boardColor, ((i - 0.5) / body.length) * TAIL_FADE);
     }
 }
 

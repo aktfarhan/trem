@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 
 @theme static {
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Helvetica, Arial, sans-serif;
+    --text-xl--line-height: normal;
+    --tracking-tight: -0.02em;
     --color-page: #141413;
     --color-ink: #f1efe8;
     --color-ink-muted: #b4b2a9;
@@ -17,6 +20,7 @@
 
 :root {
     color-scheme: dark;
+    line-height: normal;
 }
 
 @utility hairline-r {

@@ -22,6 +22,9 @@ const LEAF = {
 // Width of a grid line
 const GRID_LINE_WIDTH = 1;
 
+// Middle of a pixel
+const PIXEL_CENTER = 0.5;
+
 // Opacity of the cover that fades the board when a game ends
 const END_FADE = 0.55;
 
@@ -40,7 +43,8 @@ function drawGrid(
     context.lineWidth = GRID_LINE_WIDTH;
     context.beginPath();
     for (let i = 1; i < gridSize; i++) {
-        const offset = i * cellSize;
+        // Snap to a whole pixel, then to its middle
+        const offset = Math.round(i * cellSize) + PIXEL_CENTER;
         context.moveTo(offset, 0);
         context.lineTo(offset, boardSize);
         context.moveTo(0, offset);

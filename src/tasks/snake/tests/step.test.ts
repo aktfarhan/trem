@@ -19,6 +19,13 @@ const WALL_BODY: Cell[] = [
     { x: 17, y: 10 },
 ];
 
+// Snake along the top wall
+const TOP_WALL_BODY: Cell[] = [
+    { x: 10, y: 0 },
+    { x: 9, y: 0 },
+    { x: 8, y: 0 },
+];
+
 // Snake turning into its body
 const CURLED_BODY: Cell[] = [
     { x: 5, y: 5 },
@@ -88,6 +95,20 @@ describe('stepSnakeGame', () => {
 
         // Check the reason
         expect(next.endReason).toBe('self');
+    });
+
+    test('a crash keeps the direction and body it had', () => {
+        // Turn left into the top wall, and right into its own body
+        const wallState = makeState({ body: TOP_WALL_BODY, apple: FAR_APPLE });
+        const bodyState = makeState({ body: CURLED_BODY, apple: FAR_APPLE });
+        const wallCrash = stepSnakeGame(wallState, 'left');
+        const bodyCrash = stepSnakeGame(bodyState, 'right');
+
+        // Check both still face right and did not move
+        expect(wallCrash.direction).toBe('right');
+        expect(wallCrash.body).toEqual(TOP_WALL_BODY);
+        expect(bodyCrash.direction).toBe('right');
+        expect(bodyCrash.body).toEqual(CURLED_BODY);
     });
 
     test('moving into the cell the tail is leaving is safe', () => {
