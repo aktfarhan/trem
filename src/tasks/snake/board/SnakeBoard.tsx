@@ -1,19 +1,17 @@
 import { drawSnakeGame } from './draw';
 import { readBoardColors } from './colors';
-import { useSnakeLoop } from './useSnakeLoop';
 import { useEffect, useMemo, useRef } from 'react';
+import type { SnakeState } from '../game';
 
 // Width and height of the board
 interface SnakeBoardProps {
     size: number;
+    state: SnakeState;
 }
 
-function SnakeBoard({ size }: SnakeBoardProps) {
+function SnakeBoard({ size, state }: SnakeBoardProps) {
     // Canvas the game is drawn on
     const canvasRef = useRef<HTMLCanvasElement>(null);
-
-    // Game the bot is playing
-    const state = useSnakeLoop();
 
     // Board colors read once on mount
     const colors = useMemo(() => readBoardColors(), []);
@@ -33,20 +31,15 @@ function SnakeBoard({ size }: SnakeBoardProps) {
     }, [state, colors, size, pixelRatio]);
 
     return (
-        <div className="flex flex-col gap-3">
-            <canvas
-                ref={canvasRef}
-                width={canvasSize}
-                height={canvasSize}
-                role="img"
-                aria-label="Snake played by the scripted bot"
-                style={{ width: size, height: size }}
-                className="self-center rounded-lg hairline-ring"
-            />
-            <p className="text-right text-sm text-ink-muted">
-                Score <span className="font-semibold text-ink">{state.score}</span>
-            </p>
-        </div>
+        <canvas
+            ref={canvasRef}
+            width={canvasSize}
+            height={canvasSize}
+            role="img"
+            aria-label="Snake played by the scripted bot"
+            style={{ width: size, height: size }}
+            className="self-center rounded-lg hairline-ring"
+        />
     );
 }
 

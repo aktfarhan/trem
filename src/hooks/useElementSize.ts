@@ -21,10 +21,10 @@ export function useElementSize({ ref }: UseElementSizeParams) {
         const element = ref.current;
         if (!element) return;
         const observer = new ResizeObserver(([entry]) => {
-            const { width, height } = entry.contentRect;
-            setSize({ width, height });
+            const [box] = entry.borderBoxSize;
+            setSize({ width: box.inlineSize, height: box.blockSize });
         });
-        observer.observe(element);
+        observer.observe(element, { box: 'border-box' });
         return () => observer.disconnect();
     }, [ref]);
 
