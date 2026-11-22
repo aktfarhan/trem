@@ -30,6 +30,7 @@ const SMALL_SETTINGS: TrainingSettings = {
     mutationRate: 0.5,
     mutationSize: 1,
     gamesPerSnake: 2,
+    generationCount: 2,
 };
 
 // Games a kept snake has played after two generations
@@ -238,16 +239,26 @@ describe('trainGeneration', () => {
         expect(averageScore).toBe(averageScores(scores));
     });
 
+    test('keeps a snake after the first generation', () => {
+        // Train the first generation
+        const { training } = trainGeneration(startSmallTraining());
+
+        // Check its best snake is kept from the start
+        expect(training.kept?.model.network).toBe(findBestNetwork(training));
+        expect(training.kept?.generation).toBe(1);
+    });
+
     test('checks for a better snake only every few generations', () => {
-        // Train one generation from the start
-        const training = { ...startSmallTraining(), kept: makeKeptSnake(BEATEN_SCORE) };
+        // Train the second generation, which has no check
+        const kept = makeKeptSnake(BEATEN_SCORE);
+        const training = { ...startSmallTraining(), kept, generation: 1 };
         const result = trainGeneration(training);
 
         // Check the kept snake stays
-        expect(result.training.kept).toBe(training.kept);
+        expect(result.training.kept).toBe(kept);
     });
 
-    test('keeps the best snake at the first check', () => {
+    test('keeps the best snake at a check when none is kept', () => {
         // Train the generation that ends with a check
         const { training } = trainGeneration(makeTrainingBeforeCheck(null));
 

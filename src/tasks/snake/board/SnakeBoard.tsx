@@ -36,7 +36,7 @@ function SnakeBoard({ size, state }: SnakeBoardProps) {
             width={canvasSize}
             height={canvasSize}
             role="img"
-            aria-label="Snake played by the scripted bot"
+            aria-label="Snake game"
             style={{ width: size, height: size }}
             className="self-center rounded-lg hairline-ring"
         />

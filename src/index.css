@@ -14,11 +14,14 @@
     --leading-subtitle: 1.3;
     --tracking-tight: -0.02em;
     --spacing-timeline: 61.5px;
+    --radius-color-square: 3px;
     --color-page: #141413;
     --color-surface: #1c1c1a;
     --color-ink: #f1efe8;
     --color-ink-muted: #b4b2a9;
+    --color-ink-faint: #888780;
     --color-line: rgb(255 255 255 / 0.1);
+    --color-line-strong: rgb(255 255 255 / 0.22);
     --color-board: #181816;
     --color-grid: rgb(255 255 255 / 0.05);
     --color-snake: #1d9e75;
@@ -27,11 +30,24 @@
     --color-pupil: #1a1a19;
     --color-apple: #e24b4a;
     --color-leaf: #639922;
+    --color-run-1: #888780;
+    --color-run-2: #1d9e75;
+    --color-run-3: #85b7eb;
+    --color-run-4: #afa9ec;
+    --color-run-5: #f0997b;
 }
 
 :root {
     color-scheme: dark;
     line-height: normal;
+}
+
+@utility hairline-strong {
+    border: 0.5px solid var(--color-line-strong);
+}
+
+@utility hairline-transparent {
+    border: 0.5px solid transparent;
 }
 
 @utility hairline-r {

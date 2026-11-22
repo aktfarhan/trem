@@ -3,7 +3,7 @@ import type { KeptSnake, RunSeeds, TrainingSettings } from '../train';
 import type { GenerationReport, TrainingCommand } from '../train.worker';
 
 // Where a training stands
-type TrainingStatus = 'idle' | 'training' | 'paused' | 'stopped' | 'failed';
+export type TrainingStatus = 'idle' | 'training' | 'paused' | 'done' | 'stopped' | 'failed';
 
 // Training state, data, actions
 export type UseSnakeTrainingResult = ReturnType<typeof useSnakeTraining>;
@@ -32,6 +32,12 @@ export function useSnakeTraining() {
 
     // ----- Data/Derived State -----
 
+    // Runs started so far
+    const [runCount, setRunCount] = useState(0);
+
+    // Settings the current run trains with
+    const [runSettings, setRunSettings] = useState<TrainingSettings | null>(null);
+
     // Latest generation's report
     const [report, setReport] = useState<GenerationReport | null>(null);
 
@@ -52,10 +58,13 @@ export function useSnakeTraining() {
             shutDownWorker();
             const worker = startTrainingWorker();
 
-            // Keep each report
+            // Keep each report, and finish after the last generation
             worker.onmessage = (e: MessageEvent<GenerationReport>) => {
                 setReport(e.data);
                 if (e.data.newKept) setKept(e.data.newKept);
+                if (e.data.generation < settings.generationCount) return;
+                shutDownWorker();
+                setStatus('done');
             };
 
             // Stop on a crash
@@ -65,9 +74,11 @@ export function useSnakeTraining() {
                 setStatus('failed');
             };
 
-            // Start training, and clear reports
+            // Start training, and clear the last run's results
             sendCommand(worker, { type: 'start', seeds, settings });
             workerRef.current = worker;
+            setRunCount((prev) => prev + 1);
+            setRunSettings(settings);
             setReport(null);
             setKept(null);
             setStatus('training');
@@ -105,5 +116,9 @@ export function useSnakeTraining() {
 
     // ----- Export -----
 
-    return { state: { status }, data: { kept, report }, actions: { stop, pause, start, resume } };
+    return {
+        state: { status },
+        data: { kept, report, runCount, runSettings },
+        actions: { stop, pause, start, resume },
+    };
 }

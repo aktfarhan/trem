@@ -28,3 +28,12 @@ export function drawRandom(position: number): RandomDraw {
     // Convert to an unsigned 32-bit integer, and scale to 0 to 1
     return { value: (bits >>> 0) / UINT32_RANGE, position: nextPosition };
 }
+
+/**
+ * Picks a random seed for a new game or run.
+ *
+ * @returns Whole number that fits in 32 bits.
+ */
+export function pickRandomSeed(): number {
+    return Math.floor(Math.random() * UINT32_RANGE);
+}

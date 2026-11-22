@@ -1,5 +1,5 @@
-import { drawRandom } from '../seeded-random';
-import { describe, expect, test } from 'vitest';
+import { drawRandom, pickRandomSeed } from '../seeded-random';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 // Seed shared by every test
 const SEED = 42;
@@ -9,6 +9,15 @@ const SAMPLE_SIZE = 5;
 
 // How many numbers the range test draws
 const LARGE_SAMPLE_SIZE = 1000;
+
+// Largest number Math.random can return
+const LARGEST_RANDOM = 1 - Number.EPSILON / 2;
+
+// Largest seed that fits in 32 bits
+const LAST_SEED = 4_294_967_295;
+
+// Random number that lands between two whole seeds
+const MIDDLE_RANDOM = 0.123456789;
 
 // First three Mulberry32 numbers for SEED
 const SEED_FIRST_NUMBERS = [0.6011037519201636, 0.44829055899754167, 0.8524657934904099];
@@ -65,5 +74,30 @@ describe('drawRandom', () => {
 
         // Compare with the recorded ones
         expect(numbers).toEqual(SEED_FIRST_NUMBERS);
+    });
+});
+
+describe('pickRandomSeed', () => {
+    // Put Math.random back after each test
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    test('turns the lowest and highest random numbers into the first and last seed', () => {
+        // Pick with the lowest and highest numbers
+        vi.spyOn(Math, 'random').mockReturnValueOnce(0).mockReturnValueOnce(LARGEST_RANDOM);
+        const seeds = [pickRandomSeed(), pickRandomSeed()];
+
+        // Check both ends of the 32-bit range
+        expect(seeds).toEqual([0, LAST_SEED]);
+    });
+
+    test('gives a whole number', () => {
+        // Pick with a random number between two seeds
+        vi.spyOn(Math, 'random').mockReturnValue(MIDDLE_RANDOM);
+        const seed = pickRandomSeed();
+
+        // Check it was rounded down to a whole seed
+        expect(Number.isInteger(seed)).toBe(true);
     });
 });

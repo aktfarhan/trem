@@ -1,13 +1,14 @@
+import { DEFAULT_GRID_SIZE } from './game';
 import { scoreSnakeModel } from './fitness';
 import { drawRandom } from '../../lib/seeded-random';
 import { createSnakeModel, type SnakeModel } from './model';
+import { BASIC_GROUPS, type SignalGroupId } from './observe';
 import {
     averageWithPastScores,
     evolvePopulation,
     type EvolutionSettings,
     type ScoreRecord,
 } from '../../lib/evolution';
-import type { SignalGroupId } from './observe';
 import type { Network } from '../../lib/network';
 
 // How a training is set up
@@ -17,6 +18,7 @@ export interface TrainingSettings extends EvolutionSettings {
     hiddenSize: number;
     snakeCount: number;
     gamesPerSnake: number;
+    generationCount: number;
 }
 
 // A run's randomness
@@ -57,8 +59,24 @@ interface DrawnGames {
     worldPosition: number;
 }
 
+// Settings a run starts with
+export const DEFAULT_TRAINING_SETTINGS: TrainingSettings = {
+    groups: BASIC_GROUPS,
+    gridSize: DEFAULT_GRID_SIZE,
+    keepCount: 10,
+    hiddenSize: 16,
+    snakeCount: 64,
+    mutationRate: 0.05,
+    mutationSize: 2,
+    gamesPerSnake: 3,
+    generationCount: 200,
+};
+
 // Generations between checks for a better snake to keep
 export const KEEP_CHECK_GAP = 50;
+
+// Generation of the first check
+const FIRST_CHECK_GENERATION = 1;
 
 // Games each world draws to pick which snake to keep
 const VALIDATION_SET_SIZE = 200;
@@ -157,7 +175,8 @@ export function trainGeneration(training: SnakeTraining): TrainedGeneration {
 
     // 4. Keep the best snake if it's better
     const generation = training.generation + 1;
-    const isCheckGeneration = generation % KEEP_CHECK_GAP === 0;
+    const isFirstCheck = generation === FIRST_CHECK_GENERATION;
+    const isCheckGeneration = isFirstCheck || generation % KEEP_CHECK_GAP === 0;
     const challenger = { groups, network: bestNetwork };
     const kept = isCheckGeneration
         ? keepBetterSnake(training.kept, challenger, validationSeeds, generation, gridSize)

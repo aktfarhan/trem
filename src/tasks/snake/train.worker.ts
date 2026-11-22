@@ -53,7 +53,11 @@ function trainNextGeneration(): void {
     training = result.training;
     self.postMessage(report);
 
-    // Queue the next generation
+    // Stop after the run's last generation, or queue the next one
+    if (generation >= training.settings.generationCount) {
+        isLoopRunning = false;
+        return;
+    }
     loopChannel.port2.postMessage(null);
 }
 
