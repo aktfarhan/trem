@@ -22,6 +22,8 @@
     --color-ink-faint: #888780;
     --color-line: rgb(255 255 255 / 0.1);
     --color-line-strong: rgb(255 255 255 / 0.22);
+    --color-warning: #fac775;
+    --color-warning-surface: #412402;
     --color-board: #181816;
     --color-grid: rgb(255 255 255 / 0.05);
     --color-snake: #1d9e75;

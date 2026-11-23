@@ -1,28 +1,33 @@
 import { fitBoard } from './board/fit';
 import { chooseBotAction } from './bot';
+import TestBar from './training/TestBar';
 import { chooseModelAction } from './model';
 import SnakeBoard from './board/SnakeBoard';
+import { TEST_SET_SEEDS } from './test-set';
 import { DEFAULT_TRAINING_SETTINGS } from './train';
-import { useCallback, useMemo, useRef } from 'react';
 import TrainingHeader from './training/TrainingHeader';
 import { pickRandomSeed } from '../../lib/seeded-random';
 import TrainingTimeline from './training/TrainingTimeline';
 import { useElementSize } from '../../hooks/useElementSize';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useSnakeTraining } from './training/useSnakeTraining';
 import { useSnakeLoop, type ChooseAction } from './board/useSnakeLoop';
 
 function SnakePlayground() {
-    // Middle column's free space, header and the timeline
+    // Middle column's free space, header and footer
     const stageRef = useRef<HTMLDivElement>(null);
     const headerRef = useRef<HTMLDivElement>(null);
-    const timelineRef = useRef<HTMLDivElement>(null);
+    const footerRef = useRef<HTMLDivElement>(null);
     const stage = useElementSize({ ref: stageRef });
     const header = useElementSize({ ref: headerRef });
-    const timeline = useElementSize({ ref: timelineRef });
+    const footer = useElementSize({ ref: footerRef });
 
-    // Board that fits the space the header and timeline leave
-    const reservedHeight = header.height + timeline.height;
+    // Board that fits the space the header and footer leave
+    const reservedHeight = header.height + footer.height;
     const { boardSize, wrapWidth } = fitBoard(stage.width, stage.height, reservedHeight);
+
+    // Whether the board plays the test set
+    const [isTesting, setIsTesting] = useState(false);
 
     // Training in the background, and its latest results
     const training = useSnakeTraining();
@@ -39,7 +44,7 @@ function SnakePlayground() {
 
     // Game on the board
     const loop = useSnakeLoop({ chooseAction });
-    const { game } = loop.data;
+    const { game, results } = loop.data;
     const { restart } = loop.actions;
 
     // Generation the run has reached
@@ -52,6 +57,18 @@ function SnakePlayground() {
         restart();
     }, [start, restart]);
 
+    // Play the test set's games in order
+    const handleTest = useCallback(() => {
+        setIsTesting(true);
+        restart(TEST_SET_SEEDS);
+    }, [restart]);
+
+    // Go back to random games
+    const handleDoneTesting = useCallback(() => {
+        setIsTesting(false);
+        restart();
+    }, [restart]);
+
     return (
         <div className="flex min-h-0 flex-1">
             <aside className="w-80 shrink-0 hairline-r" />
@@ -62,19 +79,32 @@ function SnakePlayground() {
                             ref={headerRef}
                             status={status}
                             runCount={runCount}
+                            isTesting={isTesting}
+                            hasKeptSnake={kept !== null}
                             onStop={stop}
+                            onTest={handleTest}
                             onPause={pause}
                             onStart={handleStart}
                             onResume={resume}
+                            onDoneTesting={handleDoneTesting}
                         />
                         <SnakeBoard size={boardSize} state={game} />
-                        <TrainingTimeline
-                            ref={timelineRef}
-                            score={game.score}
-                            status={status}
-                            settings={runSettings}
-                            generation={generation}
-                        />
+                        <div ref={footerRef}>
+                            {isTesting ? (
+                                <TestBar
+                                    score={game.score}
+                                    results={results}
+                                    runNumber={runCount}
+                                />
+                            ) : (
+                                <TrainingTimeline
+                                    score={game.score}
+                                    status={status}
+                                    settings={runSettings}
+                                    generation={generation}
+                                />
+                            )}
+                        </div>
                     </div>
                 </div>
             </main>

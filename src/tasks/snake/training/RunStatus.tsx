@@ -1,8 +1,8 @@
 import clsx from 'clsx';
 import type { TrainingStatus } from './useSnakeTraining';
 
-// Where a run stands once it has started
-type RunState = Exclude<TrainingStatus, 'idle'>;
+// Where a run stands once it has started, or during testing
+type RunState = Exclude<TrainingStatus, 'idle'> | 'testing';
 
 // Where the current run stands
 interface RunStatusProps {
@@ -15,6 +15,7 @@ const STATUS_LABELS: Record<RunState, string> = {
     failed: 'Failed',
     paused: 'Paused',
     stopped: 'Stopped',
+    testing: 'Testing',
     training: 'Training',
 };
 
