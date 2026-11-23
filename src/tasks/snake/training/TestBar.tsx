@@ -1,17 +1,24 @@
 import TestResults from './TestResults';
-import { IconFlask } from '@tabler/icons-react';
+import { TEST_SET_SIZE } from '../test-set';
 import StatNumber from '../../../components/StatNumber';
-import type { GameResults } from '../board/useSnakeLoop';
+import ToolButton from '../../../components/ToolButton';
+import { IconFlask, IconPlayerSkipForward } from '@tabler/icons-react';
+import type { GameResults } from '../fitness';
 
 interface TestBarProps {
     score: number;
     results: GameResults;
     runNumber: number;
+    isSkipping: boolean;
+    onSkip: () => void;
 }
 
 const ICON_SIZE = 12;
 
-function TestBar({ score, results, runNumber }: TestBarProps) {
+function TestBar({ score, results, runNumber, isSkipping, onSkip }: TestBarProps) {
+    // Whether test games are left to play in the background
+    const canSkip = !isSkipping && results.gamesPlayed < TEST_SET_SIZE;
+
     return (
         <div className="pt-3">
             <div className="flex h-5 items-center justify-between text-13 text-ink-muted">
@@ -20,13 +27,17 @@ function TestBar({ score, results, runNumber }: TestBarProps) {
                     Testing Run {runNumber}
                 </span>
                 <span className="inline-flex gap-3.5">
-                    <TestResults results={results} />
+                    <TestResults results={results} isSkipping={isSkipping} />
                     <span>
                         Score <StatNumber>{score}</StatNumber>
                     </span>
                 </span>
             </div>
-            <div className="mt-2.5 h-7.5" />
+            <div className="mt-2.5 flex h-7.5 items-center justify-end">
+                <ToolButton icon={IconPlayerSkipForward} isDisabled={!canSkip} onClick={onSkip}>
+                    Skip
+                </ToolButton>
+            </div>
         </div>
     );
 }

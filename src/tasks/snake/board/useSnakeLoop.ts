@@ -2,6 +2,7 @@ import { stepSnakeGame } from '../step';
 import { createSnakeGame, type SnakeState } from '../game';
 import { pickRandomSeed } from '../../../lib/seeded-random';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { GameResults } from '../fitness';
 import type { SnakeAction } from '../direction';
 
 // Picks the next move in a game
@@ -10,12 +11,6 @@ export type ChooseAction = (state: SnakeState) => SnakeAction;
 // What moves the snake, or null to hold it still
 interface UseSnakeLoopParams {
     chooseAction: ChooseAction | null;
-}
-
-// Finished games and the apples eaten
-export interface GameResults {
-    appleCount: number;
-    gamesPlayed: number;
 }
 
 // Game on the board, its finished games, and a way to start fresh ones

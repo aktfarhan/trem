@@ -1,6 +1,7 @@
-import { TEST_SET_SIZE, type TestProgress } from '../test-set';
+import { TEST_SET_SIZE } from '../test-set';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { SnakeModel } from '../model';
+import type { GameResults } from '../fitness';
 import type { TestOrder } from '../test.worker';
 
 // Where a test run stands
@@ -28,8 +29,8 @@ export function useSnakeTesting() {
 
     // ----- Data/Derived State -----
 
-    // Games played so far and their average apples
-    const [progress, setProgress] = useState<TestProgress | null>(null);
+    // Test games played so far and their apples
+    const [progress, setProgress] = useState<GameResults | null>(null);
 
     // ----- Action Handlers -----
 
@@ -41,30 +42,31 @@ export function useSnakeTesting() {
 
     // Start a test in a fresh worker
     const start = useCallback(
-        (model: SnakeModel, gridSize: number) => {
+        (model: SnakeModel, gridSize: number, played: GameResults) => {
             shutDownWorker();
             const worker = startTestWorker();
 
             // Keep each game's progress
-            worker.onmessage = (e: MessageEvent<TestProgress>) => {
+            worker.onmessage = (e: MessageEvent<GameResults>) => {
                 setProgress(e.data);
                 if (e.data.gamesPlayed < TEST_SET_SIZE) return;
                 shutDownWorker();
                 setStatus('done');
             };
 
-            // Stop on a crash
+            // Stop on a crash, and clear progress
             worker.onerror = (e) => {
                 console.error('Snake test worker failed:', e.message);
                 shutDownWorker();
+                setProgress(null);
                 setStatus('failed');
             };
 
-            // Start the test, and clear progress
-            const order: TestOrder = { model, gridSize };
+            // Start the test from the games already played
+            const order: TestOrder = { model, played, gridSize };
             worker.postMessage(order);
             workerRef.current = worker;
-            setProgress(null);
+            setProgress(played);
             setStatus('testing');
         },
         [shutDownWorker],

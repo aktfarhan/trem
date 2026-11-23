@@ -44,6 +44,10 @@
     line-height: normal;
 }
 
+@utility hairline {
+    border: 0.5px solid var(--color-line);
+}
+
 @utility hairline-strong {
     border: 0.5px solid var(--color-line-strong);
 }

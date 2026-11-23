@@ -1,9 +1,9 @@
 import { BASIC_GROUPS } from '../observe';
 import { DEFAULT_GRID_SIZE } from '../game';
-import { scoreSnakeModel } from '../fitness';
 import { describe, expect, test } from 'vitest';
 import { createSnakeModel, type SnakeModel } from '../model';
-import { TEST_SET_SEEDS, TEST_SET_SIZE, testSnakeModel, type TestProgress } from '../test-set';
+import { scoreSnakeModel, type GameResults } from '../fitness';
+import { TEST_SET_SEEDS, TEST_SET_SIZE, testSnakeModel } from '../test-set';
 
 // Seed shared by every test
 const SEED = 42;
@@ -20,6 +20,9 @@ const RESEARCH_FIRST_SEED = 9_000_000;
 // Games played by the report checked partway through
 const PARTWAY_GAME_COUNT = 100;
 
+// Results before any test game is played
+const NONE_PLAYED: GameResults = { appleCount: 0, gamesPlayed: 0 };
+
 // Make the tiny model with every weight and bias at 0
 function makeStraightModel(): SnakeModel {
     const { model } = createSnakeModel(BASIC_GROUPS, TINY_HIDDEN_SIZE, SEED);
@@ -27,11 +30,16 @@ function makeStraightModel(): SnakeModel {
     return model;
 }
 
-// Test the model and keep the reports
-function listTestReports(model: SnakeModel, gridSize: number): TestProgress[] {
-    const reports: TestProgress[] = [];
-    testSnakeModel(model, gridSize, (progress) => reports.push(progress));
+// Test the model after the games already played
+function listTestReports(model: SnakeModel, gridSize: number, played = NONE_PLAYED): GameResults[] {
+    const reports: GameResults[] = [];
+    testSnakeModel(model, gridSize, played, (progress) => reports.push(progress));
     return reports;
+}
+
+// Average apples per game in a report
+function averageApples({ appleCount, gamesPlayed }: GameResults): number {
+    return appleCount / gamesPlayed;
 }
 
 describe('TEST_SET_SEEDS', () => {
@@ -64,7 +72,7 @@ describe('testSnakeModel', () => {
         const testScore = scoreSnakeModel(model, TEST_SET_SEEDS);
 
         // Check the last report matches
-        expect(reports.at(-1)?.averageScore).toBe(testScore);
+        expect(averageApples(reports[TEST_SET_SIZE - 1])).toBe(testScore);
     });
 
     test('averages the games played so far', () => {
@@ -74,7 +82,18 @@ describe('testSnakeModel', () => {
         const partwayScore = scoreSnakeModel(model, TEST_SET_SEEDS.slice(0, PARTWAY_GAME_COUNT));
 
         // Check the report partway through matches
-        expect(reports[PARTWAY_GAME_COUNT - 1].averageScore).toBe(partwayScore);
+        expect(averageApples(reports[PARTWAY_GAME_COUNT - 1])).toBe(partwayScore);
+    });
+
+    test('carries on after the games already played', () => {
+        // Test the model from the start, and again from partway through
+        const model = makeStraightModel();
+        const reports = listTestReports(model, DEFAULT_GRID_SIZE);
+        const played = reports[PARTWAY_GAME_COUNT - 1];
+        const laterReports = listTestReports(model, DEFAULT_GRID_SIZE, played);
+
+        // Check the second test reports what the first did after that point
+        expect(laterReports).toEqual(reports.slice(PARTWAY_GAME_COUNT));
     });
 
     test('plays on the grid size it is given', () => {
@@ -84,6 +103,6 @@ describe('testSnakeModel', () => {
         const smallScore = scoreSnakeModel(model, TEST_SET_SEEDS, SMALL_GRID_SIZE);
 
         // Check the last report matches
-        expect(reports.at(-1)?.averageScore).toBe(smallScore);
+        expect(averageApples(reports[TEST_SET_SIZE - 1])).toBe(smallScore);
     });
 });

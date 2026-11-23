@@ -2,6 +2,12 @@ import { stepSnakeGame } from './step';
 import { chooseModelAction, type SnakeModel } from './model';
 import { createSnakeGame, DEFAULT_GRID_SIZE, type SnakeState } from './game';
 
+// Finished games and the apples eaten
+export interface GameResults {
+    appleCount: number;
+    gamesPlayed: number;
+}
+
 /**
  * Plays a game with a model.
  *

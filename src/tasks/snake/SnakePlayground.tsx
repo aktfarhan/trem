@@ -1,6 +1,7 @@
 import { fitBoard } from './board/fit';
 import { chooseBotAction } from './bot';
 import TestBar from './training/TestBar';
+import { DEFAULT_GRID_SIZE } from './game';
 import { chooseModelAction } from './model';
 import SnakeBoard from './board/SnakeBoard';
 import { TEST_SET_SEEDS } from './test-set';
@@ -9,6 +10,7 @@ import TrainingHeader from './training/TrainingHeader';
 import { pickRandomSeed } from '../../lib/seeded-random';
 import TrainingTimeline from './training/TrainingTimeline';
 import { useElementSize } from '../../hooks/useElementSize';
+import { useSnakeTesting } from './training/useSnakeTesting';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useSnakeTraining } from './training/useSnakeTraining';
 import { useSnakeLoop, type ChooseAction } from './board/useSnakeLoop';
@@ -47,6 +49,15 @@ function SnakePlayground() {
     const { game, results } = loop.data;
     const { restart } = loop.actions;
 
+    // Test games left
+    const testing = useSnakeTesting();
+    const { progress } = testing.data;
+    const isSkipping = testing.state.status === 'testing';
+    const { stop: stopTesting, start: startTesting } = testing.actions;
+
+    // Test games so far
+    const testResults = progress ?? results;
+
     // Generation the run has reached
     const generation = report?.generation ?? 0;
 
@@ -63,11 +74,18 @@ function SnakePlayground() {
         restart(TEST_SET_SEEDS);
     }, [restart]);
 
-    // Go back to random games
+    // Play the test games left in the background
+    const handleSkip = useCallback(() => {
+        if (!kept) return;
+        startTesting(kept.model, DEFAULT_GRID_SIZE, results);
+    }, [kept, results, startTesting]);
+
+    // End the test, and go back to random games
     const handleDoneTesting = useCallback(() => {
+        stopTesting();
         setIsTesting(false);
         restart();
-    }, [restart]);
+    }, [stopTesting, restart]);
 
     return (
         <div className="flex min-h-0 flex-1">
@@ -93,8 +111,10 @@ function SnakePlayground() {
                             {isTesting ? (
                                 <TestBar
                                     score={game.score}
-                                    results={results}
+                                    results={testResults}
                                     runNumber={runCount}
+                                    isSkipping={isSkipping}
+                                    onSkip={handleSkip}
                                 />
                             ) : (
                                 <TrainingTimeline
